@@ -1,5 +1,6 @@
 package ru.security;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,6 +14,9 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -28,7 +32,7 @@ public class SecurityConfig {
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS) // Используем JWT, сессии не создаются
                 )
-                .addFilter(new JwtAuthenticationFilter(http.getSharedObject(AuthenticationManager.class))); // Добавляем фильтр аутентификации
+                .addFilter(new JwtAuthenticationFilter(http.getSharedObject(AuthenticationManager.class), jwtTokenUtil)); // Добавляем фильтр аутентификации
 
         return http.build();
     }
@@ -43,5 +47,10 @@ public class SecurityConfig {
                         .build()
         );
         return manager;
+    }
+
+    @Bean
+    public JwtTokenUtil jwtTokenUtil() {
+        return new JwtTokenUtil();
     }
 }
